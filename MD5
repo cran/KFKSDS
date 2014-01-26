@@ -1,4 +1,4 @@
-9b560da33a98df38bac2639832647910 *DESCRIPTION
+fc0702477a4a2a9c190da0971dc1d306 *DESCRIPTION
 d063863027eed469ca5cd54e8a391817 *NAMESPACE
 9dba3cc633ea2a111e55844c4f981c11 *R/DS.R
 37c2ebbf9911d53c2ebdb898fec54186 *R/KF-interfaces.R
@@ -18,7 +18,8 @@ d918bfdcb9941a84c0cfbc7d0337ee99 *man/KFKSDS.Rd
 48ff1530fc25a2c2216b1f19e0fc93ca *src/KF-deriv.cpp
 2904bf5a818f16ae9bed5c1cd88f21dc *src/KF.c
 87ac4254dacb55c8f1600b23e2d669f2 *src/KF.h
-3735cae0b6a4a15419906b72aed34eb0 *src/KFKSDS-deriv-steady.cpp
+b34aa9407c84f461e1971b8f3110bb08 *src/KFKSDS-deriv-steady.cpp
+a6b3c2a7a63908a7bc90f7e84cc88535 *src/KFKSDS-steady.h
 3829b8b2e1ac50e0e26dfdb59276aa1a *src/KFKSDS.h
-176e441df155835e5eed1a4f96a60ca9 *src/KSDS-deriv.cpp
-d49d07df935986ddfc1729323b3251bf *src/Makevars
+8c2a84add27bd0440417fd4a6518093d *src/KSDS-deriv.cpp
+31b2b7e91345803d8f59d2d58902623a *src/Makevars

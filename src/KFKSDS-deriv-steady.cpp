@@ -537,13 +537,13 @@ if (i < convref || i > nmconvref)
       
       gsl_matrix_mul_elements(Mmm3, ZtZ);
       std::vector<double> vmm(Mmm3->data, Mmm3->data + m*m);
-dvareps0 = accumulate(vmm.begin(), vmm.end(), 0.0);
+      dvareps0 = std::accumulate(vmm.begin(), vmm.end(), 0.0);
 
 }// else {
 //      gsl_matrix_memcpy((dP_pred.at(i)).at(j), (dP_pred.at(ip1)).at(j));
 //}
 
-dvareps[i*rp1 + j] = dvareps0;
+      dvareps[i*rp1 + j] = dvareps0;
 
       gsl_matrix_free((dN0.at(ip1)).at(j));    
       gsl_matrix_free((dP_pred.at(i)).at(j));

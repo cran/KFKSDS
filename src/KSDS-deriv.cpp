@@ -432,7 +432,7 @@ void KFKSDS_deriv_C (int *dim, double *sy, double *sZ, double *sT, double *sH,
       
       gsl_matrix_mul_elements(Mmm, ZtZ);
       std::vector<double> vmm(Mmm->data, Mmm->data + m*m);
-      dvareps[i*rp1 + j] = accumulate(vmm.begin(), vmm.end(), 0.0);
+      dvareps[i*rp1 + j] = std::accumulate(vmm.begin(), vmm.end(), 0.0);
 
       gsl_matrix_free((dN0.at(ip1)).at(j));    
       gsl_matrix_free((dP_pred.at(i)).at(j));

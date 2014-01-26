@@ -1,1 +1,1 @@
-PKG_LIBS=$(BLAS_LIBS) $(FLIBS) -lgsl -lgslcblas -Wall
+PKG_LIBS=$(BLAS_LIBS) $(FLIBS) -lgsl -lgslcblas
