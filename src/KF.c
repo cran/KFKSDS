@@ -5,9 +5,9 @@ void KF_C (const int *dim, const double *y, const double *sZ, const double *sT,
   const double *sQ, const double *sa0, const double *sP0, 
   const double *convtol, const int *convmaxiter, double *mll)
 {
-  int i, n = dim[0], m = dim[1], r = dim[2], t0 = dim[3] - 1, 
+  int i, n = dim[0], m = dim[1], t0 = dim[3] - 1, 
     checkconv = dim[4], notconv = 1, counter = 0, convit = 0; 
-    //sUP = dim[5] - 1;
+    //r = dim[2], sUP = dim[5] - 1;
   double v, f, invf, fprev;
 
   mll[0] = 0.0;
@@ -15,7 +15,7 @@ void KF_C (const int *dim, const double *y, const double *sZ, const double *sT,
   // data and state space model matrices
 
   gsl_vector_const_view vZ = gsl_vector_const_view_array(sZ, m);
-  gsl_matrix_const_view mZ = gsl_matrix_const_view_array(sZ, m, 1);
+  //gsl_matrix_const_view mZ = gsl_matrix_const_view_array(sZ, m, 1);
   gsl_matrix_const_view T = gsl_matrix_const_view_array(sT, m, m);
   gsl_matrix_const_view Q = gsl_matrix_const_view_array(sQ, m, m);
   gsl_vector_const_view a0 = gsl_vector_const_view_array(sa0, m);

@@ -11,15 +11,16 @@ void KF_deriv_steady_C (int *dim, double *sy, double *sZ, double *sT, double *sH
   std::vector< std::vector<gsl_matrix*> > *dP_pred,
   std::vector<gsl_matrix*> *dK)
 {
-  int i, j, k, s, n = dim[0], p = dim[1], m = dim[2], 
-    jm1, mp1 = m + 1, r = dim[3], rp1 = r + 1,
+  //int s, p = dim[1], mp1 = m + 1;
+  int i, j, k, n = dim[0], m = dim[2], 
+    jm1, r = dim[3], rp1 = r + 1,
     conv = 0, counter = 0;
 
   //double v, f, fim1, df[rp1], dv, dtmp; //Kisum, Kim1sum;
   double v, f, fim1, dv, dtmp; //Kisum, Kim1sum;
   std::vector<double> df(rp1); 
 
-  double mll = 0.0;  // for debugging
+  //double mll = 0.0;  // for debugging
 
   // data and state space model matrices
 
@@ -231,7 +232,7 @@ if (conv == 0) {
     
     // check if convergence to the steady state has been reached
 
-    if (i > 0 & conv == 0)
+    if ((i > 0) & (conv == 0))
     {
       if (i == 1)
       {
@@ -281,8 +282,9 @@ void KFKSDS_deriv_steady_C (int *dim, double *sy, double *sZ, double *sT, double
   double *r, double *N, double *dr, double *dN, 
   double *dahat, double *dvareps)
 {
-  int i, ip1, j, k, s, n = dim[0], p = dim[1], m = dim[2], 
-    mp1 = m + 1, ir = dim[3], rp1 = ir + 1, nrp1 = n * rp1,
+  //int s, p = dim[1], mp1 = m + 1;
+  int i, ip1, j, k, n = dim[0], m = dim[2], 
+    ir = dim[3], rp1 = ir + 1, nrp1 = n * rp1,
     rp1m = rp1 * m, iaux, irp1m,
     convref, nmconvref, nm1 = n-1,
     irsod = ir * sizeof(double), msod = m * sizeof(double), 

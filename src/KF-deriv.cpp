@@ -12,9 +12,10 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
   std::vector< std::vector<gsl_matrix*> > *dP_pred,
   std::vector<gsl_matrix*> *dK)
 {
-  int i, j, k, s, n = dim[0], m = dim[1], r = dim[2], rp1 = r + 1, 
+  //int s, mp1 = m + 1;
+  int i, j, k, n = dim[0], m = dim[1], r = dim[2], rp1 = r + 1, 
     t0 = dim[3] - 1, checkconv = dim[4], notconv = 1, counter = 0, convit = 0,
-    jm1, mp1 = m + 1; 
+    jm1; 
   double v, f, invfsq, dtmp, fprev;
 
   conv[0] = notconv;
@@ -340,11 +341,13 @@ void KF_deriv_C (const int *dim, const double *y, const double *sZ, const double
   double *a_pred0, double *P_pred0, double *K0, double *L0,  
   double *da_pred0, double *dP_pred0, double *dK0)
 {
-  int i, ip1, j, k, s, n = dim[0], m = dim[1], 
+  //int ip1, k, s, mp1 = m + 1,  nrp1 = n * rp1, iaux, irp1m,
+  //  irsod = ir * sizeof(double);
+  int i, j, n = dim[0], m = dim[1], 
     mm = m*m, nm = n*m,
-    mp1 = m + 1, ir = dim[2], rp1 = ir + 1, nrp1 = n * rp1,
-    rp1m = rp1 * m, iaux, irp1m,
-    irsod = ir * sizeof(double), msod = m * sizeof(double), 
+    ir = dim[2], rp1 = ir + 1,
+    rp1m = rp1 * m, 
+    msod = m * sizeof(double), 
     mmsod = m * msod, nsod = n * sizeof(double), nmsod = m*nsod,
     rp1msod = rp1 * msod;
 

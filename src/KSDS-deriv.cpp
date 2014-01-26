@@ -10,8 +10,9 @@ void KF_deriv_aux_C (int *dim, double *sy, double *sZ, double *sT, double *sH,
   std::vector< std::vector<gsl_matrix*> > *dP_pred,
   std::vector<gsl_matrix*> *dK)
 {
-  int i, j, k, s, n = dim[0], p = dim[1], m = dim[2], 
-    jm1, mp1 = m + 1, r = dim[3], rp1 = r + 1;    
+  //int s, p = dim[1], mp1 = m + 1;
+  int i, j, k, n = dim[0], m = dim[2], 
+    jm1, r = dim[3], rp1 = r + 1;    
 
   double v, f, df, dv, dtmp;
     
@@ -213,8 +214,9 @@ void KFKSDS_deriv_C (int *dim, double *sy, double *sZ, double *sT, double *sH,
   double *r, double *N, double *dr, double *dN, 
   double *dahat, double *dvareps)
 {
-  int i, ip1, j, k, s, n = dim[0], p = dim[1], m = dim[2], 
-    mp1 = m + 1, ir = dim[3], rp1 = ir + 1, nrp1 = n * rp1,
+  //int s, p = dim[1], mp1 = m + 1;
+  int i, ip1, j, k, n = dim[0], m = dim[2], 
+    ir = dim[3], rp1 = ir + 1, nrp1 = n * rp1,
     rp1m = rp1 * m, iaux, irp1m,
     irsod = ir * sizeof(double), msod = m * sizeof(double), 
     nsod = n * sizeof(double), rp1msod = rp1 * msod;
