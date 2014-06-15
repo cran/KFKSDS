@@ -194,11 +194,13 @@ all.equal(kf$mll, kfdc$mll)
 # as expected the versions that use compiled C code
 # are faster that the versions written fully in R
 # e.g. not including derivatives
+\dontrun{
 system.time(for(i in seq_len(10)) kf <- KF(m@y, ss))
 system.time(for(i in seq_len(10)) kfc <- KF.C(m@y, ss))
 # e.g. including derivatives
 system.time(for(i in seq_len(10)) kfd <- KF.deriv(m@y, ss))
 system.time(for(i in seq_len(10)) kfdc <- KF.deriv.C(m@y, ss, return.all = TRUE))
+}
 
 # compare analytical and numerical derivatives
 # they give same results up to a tolerance error
@@ -221,18 +223,22 @@ all.equal(df, colSums(kfdc$df), check.attributes = FALSE)
 # no calls to compiled C code in either case
 # looking at these timings, using analytical derivatives is
 # expected to be useful in optimization algorithms
+\dontrun{
 system.time(for (i in seq_len(10)) 
   numdv <- numDeriv::grad(func = fcn, x = m@pars, model = m, type = "v"))
 system.time(for(i in seq_len(10)) kfdv <- colSums(KF.deriv(m@y, ss)$dv))
+}
 
 # compare timings when convergence is not checked with the case 
 # when steady state values are used after convergence is observed
 # computation time is reduced substantially
+\dontrun{
 n <- length(m@y)
 system.time(for(i in seq_len(20)) a <- KF.deriv(m@y, ss, convergence = c(0.001, n)))
 system.time(for(i in seq_len(20)) b <- KF.deriv(m@y, ss, convergence = c(0.001, 10)))
 # the results are the same up to a tolerance error
 all.equal(colSums(a$dv), colSums(b$dv))
+}
 }
 
 \keyword{ts, model}

@@ -1,0 +1,27 @@
+
+Version: 1.4 2014-06-15
+------------------------
+
+  o Added the method "predict" for objects of class "stsmSS" 
+    Those objects are returned by "stsm.class::char2numeric".
+    The method is equivalent to "predict.StructTS" but the forecasts
+    of the components are also returned. In addition, it is straightforward
+    to use for a model fitted by any of the maximum likelihood procedures 
+    available in package "stsm".
+
+Version: 1.3 2014-01-26
+------------------------
+
+  o Fixed the following warning returned by the compiler at some points 
+    in the code:
+    "warning: ISO C++ forbids variable length array ‘df’ [-Wvla]"
+
+  o Removed suggested package "sspir" since it is no longer available-
+
+  o Removed suggested package "KFAS" since the examples using this 
+    package relied on a previous version of "KFAS".
+
+Version: 1.1 2014-01-25
+------------------------
+
+  o First version submitted to CRAN.

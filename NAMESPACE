@@ -2,17 +2,19 @@
 useDynLib(KFKSDS)
 
 export(
+DS,
+DS.deriv,
+KalmanFilter,
 KF,
 KF.C,
 KF.deriv,
 KF.deriv.C,
-KS,
-KS.deriv,
-DS,
-DS.deriv,
 KSDS,
 KSDS.deriv,
 KFKSDS.deriv.C,
 KFKSDS.deriv.steady.C,
-make.KF.args,
-KalmanFilter)
+KS,
+KS.deriv,
+make.KF.args)
+
+S3method(predict, stsmSS)
