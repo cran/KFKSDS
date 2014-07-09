@@ -160,7 +160,7 @@ KF.C <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1) #sUP = 1
   mll
 }
 
-KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
+KF.deriv <- function(y, ss, xreg = NULL, convergence = c(0.001, length(y)), t0 = 1)
 {
   n <- length(y)
   r <- ncol(ss$V)
@@ -182,6 +182,20 @@ KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
   checkconv <- maxiter < n
   convit <- if (checkconv) 0 else NULL
 
+  if (!is.null(xreg))
+  {
+    # no check about the correct definition of "xreg"
+    # which should be a list containg a matrix (xreg) with 
+    # length(y) number of rows and a vector with the 
+    # corresponding coefficients (coefs)
+    if (is.list(xreg)) {
+      y <- y - xreg$xreg %*% cbind(xreg$coefs)
+      xreg <- xreg$xreg
+    } # otherwise "y" is assumed to be passed already as y-xreg*coefs
+    ncxreg <- ncol(xreg)    
+  } else
+    ncxreg <- 0
+
   # storage vectors
 
   a.pred <- matrix(nrow = n, ncol = length(a0))
@@ -189,18 +203,19 @@ KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
   a.upd <- matrix(nrow = n + 1, ncol = length(a0))
   P.upd <- array(NA, dim = c(dim(P0), n + 1))
 
-  da.pred <- array(dim = c(n, ncol(Z), rp1))
-  dimnames(da.pred)[[3]] <- paste("var", seq_len(rp1), sep = "")
+  varnms <- paste("var", seq_len(rp1), sep = "")
+  da.pred <- array(dim = c(n, ncol(Z), rp1 + ncxreg))
+  dimnames(da.pred)[[3]] <- c(varnms, colnames(xreg))
   dP.pred <- array(dim = c(dim(P0), n, rp1))
-  dimnames(dP.pred)[[4]] <- dimnames(da.pred)[[3]]
-  da.upd <- array(dim = c(n + 1, ncol(Z), rp1))
+  dimnames(dP.pred)[[4]] <- varnms
+  da.upd <- array(0, dim = c(n + 1, ncol(Z), rp1 + ncxreg))
   dimnames(da.upd)[[3]] <- dimnames(da.pred)[[3]]
-  dP.upd <- array(dim = c(dim(P0), n + 1, rp1))
-  dimnames(dP.upd)[[4]] <- dimnames(da.pred)[[3]]
-  dv <- df <- matrix(nrow = n, ncol = rp1)
-  colnames(dv) <- colnames(df) <- dimnames(da.pred)[[3]]
-  dK <- array(dim = c(n, ncol(Z), rp1))
-  dimnames(dK)[[3]] <- dimnames(da.pred)[[3]]
+  dP.upd <- array(0, dim = c(dim(P0), n + 1, rp1))
+  dimnames(dP.upd)[[4]] <- varnms
+  dv <- matrix(nrow = n, ncol = rp1 + ncxreg)
+  colnames(dv) <- dimnames(da.pred)[[3]]
+  df <- matrix(nrow = n, ncol = rp1, dimnames = list(NULL, varnms))
+  dK <- array(dim = c(n, ncol(Z), rp1), dimnames = list(NULL, NULL, varnms))
 
   K <- matrix(nrow = n, ncol = length(a0))
   L <- array(NA, dim = c(length(a0), length(a0), n))
@@ -211,11 +226,11 @@ KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
   a.upd[1,] <- a0
   P.upd[,,1] <- P0
 
-  for (i in seq_len(rp1))
-  {
-    da.upd[1,,i] <- 0
-    dP.upd[,,1,i] <- 0
-  }
+  #for (i in seq_len(rp1))
+  #{
+  #  da.upd[1,,i] <- 0
+  #  dP.upd[,,1,i] <- 0
+  #}
 
   # filtering recursions
 
@@ -347,6 +362,22 @@ KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
       }
     } # end for (j in seq_len(rp1))
 
+    if (!is.null(xreg))
+    {
+      k <- 1
+      for (j in seq(rp1 + 1, ncol(dv)))
+      {
+        da.pred[i,,j] <- mT %*% da.upd[i,,j]
+        dv[i,j] <- -Z %*% da.pred[i,,j] - xreg[i,k]
+        da.upd[ip1,,j] <- da.pred[i,,j] + Mt * dv[i,j] / f[i]
+        k <- k + 1
+
+        if (is.na(y[i])) {
+          da.upd[ip1,,j] <- da.pred[i,,j]
+        }
+      }
+    }
+
     if (is.na(y[i]))
     {
       if (!notconv) {
@@ -368,11 +399,11 @@ KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
   K <- ts(K)
   tsp(v) <- tsp(f) <- tsp(a.upd) <- tsp(K) <- tsp(y)
 
-  dvof <- (dv*c(f) - c(v)*df) / c(f)^2
+  dvof <- (dv[,varnms]*c(f) - c(v)*df) / c(f)^2
 
   m <- ncol(ss$Z)
   dL <- array(0, dim = c(m, m, rp1, n))
-  dimnames(dL)[[3]] <- dimnames(da.pred)[[3]]
+  dimnames(dL)[[3]] <- varnms #dimnames(da.pred)[[3]]
   for (k in seq_len(dim(dL)[3]))
   {
     for (i in seq_len(n))
@@ -395,7 +426,8 @@ KF.deriv <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
     dL = dL, mll = mll, convit = convit)
 }
 
-KF.deriv.C <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1, return.all = FALSE)
+KF.deriv.C <- function(y, ss, xreg = NULL, convergence = c(0.001, length(y)), 
+  t0 = 1, return.all = FALSE)
 {
   stopifnot(convergence[2] >= 1)
   checkconv <- as.integer(convergence[2] < length(y))
@@ -410,24 +442,41 @@ KF.deriv.C <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1, return.
   nrp1 <- nr + n #n * rp1
   nrp1m <- nrp1 * m
 
+  if (!is.null(xreg))
+  {
+    # no check about the correct definition of "xreg"
+    # which should be a list containg a matrix (xreg) with 
+    # length(y) number of rows and a vector with the 
+    # corresponding coefficients (coefs)
+    if (is.list(xreg)) {
+      y <- y - xreg$xreg %*% cbind(xreg$coefs)
+      xreg <- xreg$xreg
+    } # otherwise "y" is assumed to be passed already as y-xreg*coefs
+    ncxreg <- ncol(xreg)    
+  } else
+    ncxreg <- 0
+
   y[is.na(y)] <- -9999.99
 
   res <- .C("KF_deriv_C", 
-    dim = as.integer(c(n, m, r, t0, checkconv)), #sUP
-    y = as.numeric(y), sZ = as.numeric(ss$Z), sT = as.numeric(t(ss$T)), 
+    dim = as.integer(c(n, m, r, t0, checkconv, ncxreg)), #sUP
+    y = as.numeric(y), xreg = as.numeric(xreg), 
+    sZ = as.numeric(ss$Z), sT = as.numeric(t(ss$T)), 
     sH = as.numeric(ss$H), sR = as.numeric(t(ss$R)), sV = as.numeric(ss$V), 
     sQ = as.numeric(ss$Q), sa0 = as.numeric(ss$a0), sP0 = as.numeric(ss$P0),
     convtol = as.numeric(convergence[1]), convmaxiter = as.integer(convergence[2]),
     conv = integer(2), mll = double(1), invf = double(n), vof = double(n),
     dvof = double(nrp1), dfinvfsq = double(nrp1),
-    dv = double(nrp1), df = double(nrp1), 
+    dv = double(nrp1 + n*ncxreg), df = double(nrp1), 
     a_pred0 = double(nm), P_pred0 = double(nmm),
-    K0 = double(nm), L0 = double(nmm), da_pred0 = double(nrp1m),
+    K0 = double(nm), L0 = double(nmm), da_pred0 = double(nrp1m + nm*ncxreg),
     dP_pred0 = double(nrp1m*m), dK0 = double(nrp1m),
     PACKAGE = "KFKSDS")
 
-  dv <- matrix(res$dv, nrow = n, ncol = rp1)
   df <- matrix(res$df, nrow = n, ncol = rp1)
+  colnames(df) <- paste("var", seq_len(ncol(df)), sep = "")
+  dv <- matrix(res$dv, nrow = n, ncol = rp1 + ncxreg)
+  colnames(dv) <- c(colnames(df), colnames(xreg))
 
   if (res$conv[1] == 0) {
     convit <- res$conv[2] + 1
@@ -438,11 +487,10 @@ KF.deriv.C <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1, return.
 
   if (return.all)
   {
-    dvof <- matrix(res$dvof, nrow = n, ncol = rp1)
-
     L <- array(res$L, dim = c(m, m, n))
     dK0 <- res$dK0  
-    da.pred <- dK <- array(dim = c(n, m, rp1))    
+    da.pred <- array(dim = c(n, m, ncol(dv)))
+    dK <- array(dim = c(n, m, rp1))
     rp1m <- rp1 * m
     ref1 <- seq_len(rp1m)
     dP.pred <- array(dim = c(m, m, n, rp1))
@@ -464,7 +512,7 @@ KF.deriv.C <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1, return.
 
     dapred0 <- res$da_pred0
     ref <- seq_len(nm)
-    for (i in seq.int(rp1))
+    for (i in seq.int(rp1 + ncxreg))
     {
       da.pred[,,i] <- matrix(dapred0[ref], nrow = n, ncol = m, byrow = TRUE)
       dapred0 <- dapred0[-ref]
@@ -480,13 +528,12 @@ KF.deriv.C <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1, return.
       }
     }
   } else
-    dvof <- L <- dL <- da.pred <- dP.pred <- dK <- NULL
+    L <- dL <- da.pred <- dP.pred <- dK <- NULL
 
-  f <- 1 / res$invf
-
+  f <- ts(1 / res$invf)
   v <- ts(res$vof * f)
-  dvof <- (dv*c(f) - c(v)*df) / c(f)^2
-  f <- ts(f)
+  #dvof <- (dv*c(f) - c(v)*df) / c(f)^2
+  dvof <- matrix(res$dvof, nrow = n, ncol = rp1)
   a.pred <- ts(matrix(res$a_pred, nrow = n, ncol = m, byrow = TRUE))
   K <- ts(matrix(res$K, nrow = n, ncol = m, byrow = TRUE))
   tsp(v) <- tsp(f) <- tsp(a.pred) <- tsp(K) <- tsp(y)

@@ -88,8 +88,7 @@ lines(exp(res$pred - 2 * res$se), col = "red", lty = 2)
 # see the "stsm" package for a more flexible interface for maximum likelihood 
 # procedures to fit a structural time series model
 trend <- exp(fitted(fit)[,1])
-plot(cbind(trend, AirPassengers), 
-  type = "n", plot.type = "single")
+plot(cbind(trend, AirPassengers), type = "n", plot.type = "single")
 lines(AirPassengers, col = "gray")
 lines(trend)
 lines(exp(res$a[,1]), col = "blue")

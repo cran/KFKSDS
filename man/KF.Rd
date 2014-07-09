@@ -14,13 +14,15 @@ for a state space model.
 \usage{
 KF(y, ss, convergence = c(0.001, length(y)), t0 = 1)
 KF.C(y, ss, convergence = c(0.001, length(y)), t0 = 1)
-KF.deriv(y, ss, convergence = c(0.001, length(y)), t0 = 1)
-KF.deriv.C(y, ss, convergence = c(0.001, length(y)), t0 = 1, return.all = FALSE)
+KF.deriv(y, ss, xreg = NULL, convergence = c(0.001, length(y)), t0 = 1)
+KF.deriv.C(y, ss, xreg = NULL, convergence = c(0.001, length(y)), 
+  t0 = 1, return.all = FALSE)
 }
 
 \arguments{
 \item{y}{a numeric time series or vector.}
 \item{ss}{a list containing the matrices of the state space model.}
+\item{xreg}{optional matrix or list of external regressors. See details.}
 \item{convergence}{a numeric vector of length two to control and determine 
 the convergence of the filter. See details below.}
 \item{t0}{a numeric indicating the index of the first observation 
@@ -113,6 +115,23 @@ in Harvey (1989) Sec. 3.3.4.
 %If value of the likelihood function happens to be infinite 
 %(caused by a value of the error prediction error equal to zero), 
 %it is set equal to \eqn{99999}.
+
+\emph{External regressors.}
+A matrix of external regressors can be passed in argument \code{xreg}.
+If \code{xreg} is a matrix then it is assumed that the time series 
+passed in argument \code{y} has been already adjusted for the effect 
+of these regressors, that is, \eqn{y_t^{adj} = y_t - X \gamma}.
+If \code{y} is the observed series, then \code{xreg} should be a list containing 
+the following elements: \code{xreg}, the matrix of regressors; and 
+\code{coefs}, the vector of coefficients, \eqn{\gamma}, related to the regressors.
+The coefficients must be placed in \code{coefs} in the same order 
+as the corresponding vectors are arranged by columns in \code{xreg}.
+
+The number of rows of the matrix of regressors must be equal to the length 
+of the series \code{y}. 
+
+Column names are necessary for \code{KF.deriv} and 
+are optional for \code{KF.deriv.C}.
 }
 
 \value{

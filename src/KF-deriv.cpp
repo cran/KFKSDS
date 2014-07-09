@@ -1,8 +1,8 @@
 #include "KFKSDS.h"
 
-void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ, 
-  const double *sT, const double *sH, const double *sR, const double *sV, 
-  const double *sQ, const double *sa0, const double *sP0, 
+void KF_deriv_aux2_C (const int *dim, const double *y, const double *xreg, 
+  const double *sZ, const double *sT, const double *sH, const double *sR, 
+  const double *sV, const double *sQ, const double *sa0, const double *sP0, 
   const double *convtol, const int *convmaxiter,
   int *conv, double *mll, double *invf, double *vof, double *dvof, 
   double *dfinvfsq, double *dv, double *df,
@@ -14,14 +14,14 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
 {
   //int s, mp1 = m + 1;
   int i, j, k, n = dim[0], m = dim[1], r = dim[2], rp1 = r + 1, 
-    t0 = dim[3] - 1, checkconv = dim[4], notconv = 1, counter = 0, convit = 0,
-    jm1; 
+    t0 = dim[3] - 1, checkconv = dim[4], ncxreg = dim[5],
+    notconv = 1, counter = 0, convit = 0, ncoldv = rp1 + ncxreg, jm1; 
   double v, f, invfsq, dtmp, fprev;
 
   conv[0] = notconv;
   conv[1] = 0;
   mll[0] = 0.0;
-  
+
   // data and state space model matrices
 
   gsl_vector_const_view Z = gsl_vector_const_view_array(sZ, m);
@@ -55,13 +55,14 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
 
   std::vector<gsl_matrix*> dP_upd(rp1);
 
-  for (j = 0; j < rp1; j++)
+  for (j = 0; j < ncoldv; j++)
   {
     da_pred[0].at(j) = gsl_matrix_calloc(n, m);
-    dP_upd.at(j) = gsl_matrix_calloc(m, m);
+    if (j < rp1)
+      dP_upd.at(j) = gsl_matrix_calloc(m, m);
   }
 
-  gsl_matrix *da_upd = gsl_matrix_calloc(rp1, m);
+  gsl_matrix *da_upd = gsl_matrix_calloc(ncoldv, m);
 
   // filtering recursions
 
@@ -203,9 +204,7 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
       m2_irow = gsl_matrix_row(da_pred[0].at(j), i);
       gsl_blas_dgemv(CblasNoTrans, 1.0, &T.matrix, &m_irow.vector, 
           0.0, &m2_irow.vector);
-      
       gsl_blas_ddot(mZ, &m2_irow.vector, &dv[k]);
-
       (dP_pred[0].at(i)).at(j) = gsl_matrix_calloc(m, m);
 
       if (notconv == 1)
@@ -278,7 +277,24 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
         //gsl_matrix_memcpy(dP_upd.at(j), dP_upd.at(j));
         ////dK outside the loop over 'j'
       //}
+/*
+if(j==0){
+//printf("\ni = %d\n", i+1);
+//for (int kk = 0; kk < m; kk++)
+//{
+//  printf("%g  ", gsl_vector_get(Vm_cp, kk));
+//}
 
+//m4_irow = gsl_matrix_row(da_upd, 3);
+//gsl_vector_add(&m4_irow.vector, &m5_irow.vector);
+//gsl_blas_daxpy(dv[k3], Vm_cp, &m4_irow.vector);
+
+gsl_blas_dgemv(CblasNoTrans, 0.0, (dP_pred[0].at(0)).at(0), &Z.vector, 
+  0.0, &m4_irow.vector);
+gsl_vector_add(&m4_irow.vector, &m5_irow.vector);
+gsl_blas_daxpy(dv[k3], Vm_cp, &m4_irow.vector);
+}
+*/
       if (isNA(y[i]))
       {
         gsl_vector_memcpy(&m_irow.vector, &m2_irow.vector);
@@ -289,6 +305,30 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
     if (notconv == 0) {
       gsl_matrix_memcpy(dK[0].at(i), dK[0].at(i-1));
     }
+    
+    //if (ncxreg > 0 && j == r)
+    if (ncxreg > 0)
+    {
+      int k2 = 0;
+      
+      for (int j2 = rp1; j2 < ncoldv; j2++)
+      {
+        int k3 = i + j2 * n;
+
+        m_irow = gsl_matrix_row(da_upd, j2);
+        m2_irow = gsl_matrix_row(da_pred[0].at(j2), i);
+        gsl_blas_dgemv(CblasNoTrans, 1.0, &T.matrix, &m_irow.vector, 
+          0.0, &m2_irow.vector);
+        gsl_blas_ddot(mZ, &m2_irow.vector, &dv[k3]);
+        dv[k3] -= xreg[i + k2 * n];
+
+        gsl_vector_set_zero(&m_irow.vector); 
+        gsl_vector_add(&m_irow.vector, &m2_irow.vector);
+        gsl_blas_daxpy(dv[k3], Vm_cp, &m_irow.vector);
+
+        k2 += 1;
+      }
+    }
 
     if (isNA(y[i]))
     {
@@ -297,11 +337,12 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
         counter = 1;
       }
 
-      for (j = 0; j < rp1; j++)
+      for (j = 0; j < ncoldv; j++)
       {
         k = i + j * n;
         dv[k] = 0.0;
-        df[k] = 0.0;
+        if (j < rp1)
+          df[k] = 0.0;
       }
     }
   }
@@ -332,7 +373,8 @@ void KF_deriv_aux2_C (const int *dim, const double *y, const double *sZ,
 }
 
 extern "C" {
-void KF_deriv_C (const int *dim, const double *y, const double *sZ, const double *sT, 
+void KF_deriv_C (const int *dim, const double *y, const double *xreg,
+  const double *sZ, const double *sT, 
   const double *sH, const double *sR, const double *sV, const double *sQ, 
   const double *sa0, const double *sP0, 
   const double *convtol, const int *convmaxiter,
@@ -345,7 +387,7 @@ void KF_deriv_C (const int *dim, const double *y, const double *sZ, const double
   //  irsod = ir * sizeof(double);
   int i, j, n = dim[0], m = dim[1], 
     mm = m*m, nm = n*m,
-    ir = dim[2], rp1 = ir + 1,
+    ir = dim[2], rp1 = ir + 1, ncxreg = dim[5],
     rp1m = rp1 * m, 
     msod = m * sizeof(double), 
     mmsod = m * msod, nsod = n * sizeof(double), nmsod = m*nsod,
@@ -356,13 +398,13 @@ void KF_deriv_C (const int *dim, const double *y, const double *sZ, const double
     
   gsl_matrix * K = gsl_matrix_alloc(n, m);  
   std::vector<gsl_matrix*> L(n);
-  std::vector<gsl_matrix*> da_pred(rp1);
+  std::vector<gsl_matrix*> da_pred(rp1 + ncxreg);
   std::vector< std::vector<gsl_matrix*> > dP_pred(n, std::vector<gsl_matrix*>(rp1));
   std::vector<gsl_matrix*> dK(n);
 
   // filtering
 
-  KF_deriv_aux2_C(dim, y, sZ, sT, sH, sR, sV, sQ, sa0, sP0, 
+  KF_deriv_aux2_C(dim, y, xreg, sZ, sT, sH, sR, sV, sQ, sa0, sP0, 
     convtol, convmaxiter,
     conv, mll, invf, vof, dvof, dfinvfsq, dv, df, a_pred, &P_pred, 
     K, &L, &da_pred, &dP_pred, &dK);
@@ -385,11 +427,14 @@ void KF_deriv_C (const int *dim, const double *y, const double *sZ, const double
       gsl_matrix_free(dK.at(i));
     }
 
-    for (j = 0; j < rp1; j++)
+    for (j = 0; j < rp1 + ncxreg; j++)
     {
-      memcpy(&dP_pred0[i*rp1*mm+j*mm], ((dP_pred.at(i)).at(j))->data, mmsod);
-      gsl_matrix_free((dP_pred.at(i)).at(j));
-      
+      if (j < rp1)
+      {
+        memcpy(&dP_pred0[i*rp1*mm+j*mm], ((dP_pred.at(i)).at(j))->data, mmsod);
+        gsl_matrix_free((dP_pred.at(i)).at(j));
+      }
+
       if (i == 0)
       {
         memcpy(&da_pred0[j*nm], (da_pred.at(j))->data, nmsod);

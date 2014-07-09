@@ -1,10 +1,20 @@
 
+Version: 1.5 2014-07-21
+------------------------
+
+  o Added argument "xreg" to functions "KF.deriv" and "KF.deriv.C".
+    The analytical derivatives with respect to the coefficients of regressors 
+    specified in the observation equation canbe evaluated.
+    This is useful for example in package "stsm", where the analytical 
+    derivatives of the likelihood function can be obtained now 
+    for a model with external regressors.
+
 Version: 1.4 2014-06-15
 ------------------------
 
   o Added the method "predict" for objects of class "stsmSS" 
     Those objects are returned by "stsm.class::char2numeric".
-    The method is equivalent to "predict.StructTS" but the forecasts
+    The method is equivalent to "stats::predict.StructTS" but the forecasts
     of the components are also returned. In addition, it is straightforward
     to use for a model fitted by any of the maximum likelihood procedures 
     available in package "stsm".

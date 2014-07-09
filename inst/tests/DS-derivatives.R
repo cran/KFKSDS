@@ -45,9 +45,11 @@ fcn <- function(x, model, type, i = 1)
 
 d <- numDeriv::grad(func = fcn, x = m@pars, model = m, type = "epshat")
 all.equal(d, dsd$depshat)
+#[1] "Mean relative difference: 8.606765e-06"
 
 d <- numDeriv::grad(func = fcn, x = m@pars, model = m, type = "vareps")
 all.equal(d, dsd$dvareps)
+#[1] TRUE
 
 for (i in 1:2)
 {
