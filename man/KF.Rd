@@ -74,9 +74,9 @@ The source code follows the notation used in Durbin and Koopman (2001).
 
 The elements in the argument \code{ss} must be named in accordance with 
 the notation given below for the state space representation.
-For those models defined in the package \pkg{stsm.class},
+For those models defined in the package \pkg{stsm},
 a convenient way to create the argument \code{ss} is by means of the 
-function \code{\link[stsm.class]{char2numeric}}.
+function \code{\link[stsm]{char2numeric}}.
 
 The contributions to the likelihood function of the first observations 
 may be omitted by choosing a value of \code{t0} greater than one.
@@ -185,15 +185,15 @@ Cambridge University Press.
 }
 
 \seealso{
-\code{\link[stsm.class]{char2numeric}} in package \pkg{stsm.class}.
+\code{\link[stsm]{char2numeric}} in package \pkg{stsm}.
 }
 
 \examples{
 # local level plus seasonal model with arbitrary parameter values
 # for the 'JohnsonJohnson' time series
-m <- stsm.class::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
+m <- stsm::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
   pars = c("var1" = 2, "var2" = 15, "var3" = 30))
-ss <- stsm.class::char2numeric(m)
+ss <- stsm::char2numeric(m)
 
 # run the Kalman filter
 kf <- KF(m@y, ss)
@@ -225,8 +225,8 @@ system.time(for(i in seq_len(10)) kfdc <- KF.deriv.C(m@y, ss, return.all = TRUE)
 # they give same results up to a tolerance error
 fcn <- function(x, model, type = c("v", "f"))
 {
-  m <- stsm.class::set.pars(model, x)
-  ss <- stsm.class::char2numeric(m)
+  m <- stsm::set.pars(model, x)
+  ss <- stsm::char2numeric(m)
   kf <- KF(m@y, ss)
   switch(type, "v" = sum(kf$v), "f" = sum(kf$f))
 }

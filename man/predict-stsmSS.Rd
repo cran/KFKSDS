@@ -44,11 +44,12 @@ Cambridge University Press.
 \examples{
 ## local level model
 ## Nile time series
+require("stsm")
 y <- Nile
-m <- stsm.class::stsm.model(model = "local-level", y = y, transPars = "StructTS")
+m <- stsm::stsm.model(model = "local-level", y = y, transPars = "StructTS")
 fit <- StructTS(y, "level")
-m <- stsm.class::set.pars(m, as.vector(fit$coef[c(2,1)]) * 100 / var(y))
-ss <- stsm.class::char2numeric(m, P0cov = TRUE)
+m <- stsm::set.pars(m, as.vector(fit$coef[c(2,1)]) * 100 / var(y))
+ss <- stsm::char2numeric(m, P0cov = TRUE)
 res <- predict(ss, y, 5)
 
 # display forecasts and confidence intervals
@@ -65,10 +66,10 @@ all.equal(res$se, predict(fit, 5)$se)
 ## basic Structural model
 ## AirPassengers time series (in logarithms)
 y <- log(AirPassengers)
-m <- stsm.class::stsm.model(model = "BSM", y = y, transPars = "StructTS")
+m <- stsm::stsm.model(model = "BSM", y = y, transPars = "StructTS")
 fit <- StructTS(y, "BSM")
-m <- stsm.class::set.pars(m, as.vector(fit$coef[c(4,1:3)]) * 100 / var(y))
-ss <- stsm.class::char2numeric(m, P0cov = TRUE)
+m <- stsm::set.pars(m, as.vector(fit$coef[c(4,1:3)]) * 100 / var(y))
+ss <- stsm::char2numeric(m, P0cov = TRUE)
 res <- predict(ss, y, 12)
 
 all.equal(res$pred, predict(fit, 12)$pred)

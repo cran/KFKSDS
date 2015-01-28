@@ -1,12 +1,12 @@
 
-library("stsm.class")
+library("stsm")
 library("KFKSDS")
 library("numDeriv")
 
 # derivative terms
 
 xreg <- cbind(xreg = 1 * as.numeric(seq_len(length(JohnsonJohnson)) > 40))
-m <- stsm.class::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
+m <- stsm::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
   pars = c("var1" = 2, "var2" = 15, "var3" = 30, "xreg" = 3), 
   xreg = xreg)
 
@@ -16,9 +16,9 @@ m <- stsm.class::stsm.model(model = "llm+seas", y = JohnsonJohnson,
 
 fnc.part <- function(x, model, type, i, j)
 {
-  m <- stsm.class::set.pars(model, x)
+  m <- stsm::set.pars(model, x)
   m@y <- model@y - m@xreg %*% cbind(m@pars["xreg"])
-  ss <- stsm.class::char2numeric(m, P0cov = FALSE)
+  ss <- stsm::char2numeric(m, P0cov = FALSE)
 
   kf <- KF(m@y, ss)
   switch(type, 
@@ -69,7 +69,7 @@ g
 
 m2 <- m
 m2@y <- m2@y - xreg * m2@pars["xreg"]
-ss <- stsm.class::char2numeric(m2, P0cov = FALSE)
+ss <- stsm::char2numeric(m2, P0cov = FALSE)
 kf <- KF.deriv(m2@y, ss, xreg = m2@xreg)
 
 colSums(kf$dv)

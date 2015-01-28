@@ -4,13 +4,13 @@
 # different funcions to compute the latter; 
 # all of them should yield same results up to a tolerance
 
-library("stsm.class")
+library("stsm")
 library("KFKSDS")
 library("numDeriv")
 
-m <- stsm.class::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
+m <- stsm::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
   pars = c("var1" = 2, "var2" = 15, "var3" = 30))
-ss <- stsm.class::char2numeric(m)
+ss <- stsm::char2numeric(m)
 
 convergence <- c(0.001, length(m@y))
 #convergence <- c(0.001, 10)
@@ -30,8 +30,8 @@ dsd <- DS.deriv(ss, ksd)
 
 fcn <- function(x, model, type, i = 1)
 {
-  m <- stsm.class::set.pars(model, x)
-  ss <- stsm.class::char2numeric(m)
+  m <- stsm::set.pars(model, x)
+  ss <- stsm::char2numeric(m)
   kf <- KF(m@y, ss)
   ks <- KS(m@y, ss, kf)
   ds <- DS(m@y, ss, kf, ks)

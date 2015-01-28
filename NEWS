@@ -1,6 +1,20 @@
 
-Version: 1.5 2014-07-21
-------------------------
+Changes in version 1.6 2014-01-24
+-----------------------------------
+
+  o The examples and code scripts have been updated now that 
+    the class and methods defined in package "stsm.class" have been 
+    merged in package "stsm".
+
+  o function "KalmanFilter": the function has been adapted to the 
+    new definition "KFAS::KFS" and it is again available;
+    "sspir::kfilter" is not included because the archived package "sspir" 
+    is not available for "R Under devel" and may give some problems when 
+    submitting to CRAN and passing R CMD check. The call to "sspir" can 
+    nevertheless be found in 'KF-interfaces.R' prepended by comment marks.
+
+Changes in version 1.5 2014-07-21
+-----------------------------------
 
   o Added argument "xreg" to functions "KF.deriv" and "KF.deriv.C".
     The analytical derivatives with respect to the coefficients of regressors 
@@ -9,8 +23,8 @@ Version: 1.5 2014-07-21
     derivatives of the likelihood function can be obtained now 
     for a model with external regressors.
 
-Version: 1.4 2014-06-15
-------------------------
+Changes in version 1.4 2014-06-15
+-----------------------------------
 
   o Added the method "predict" for objects of class "stsmSS" 
     Those objects are returned by "stsm.class::char2numeric".
@@ -19,8 +33,8 @@ Version: 1.4 2014-06-15
     to use for a model fitted by any of the maximum likelihood procedures 
     available in package "stsm".
 
-Version: 1.3 2014-01-26
-------------------------
+Changes in version 1.3 2014-01-26
+-----------------------------------
 
   o Fixed the following warning returned by the compiler at some points 
     in the code:
@@ -31,7 +45,7 @@ Version: 1.3 2014-01-26
   o Removed suggested package "KFAS" since the examples using this 
     package relied on a previous version of "KFAS".
 
-Version: 1.1 2014-01-25
-------------------------
+Changes in version 1.1 2014-01-25
+-----------------------------------
 
   o First version submitted to CRAN.

@@ -1,6 +1,6 @@
 
 KalmanFilter <- function(y, ss, 
-  KF.version = c("KFKSDS", "StructTS", "FKF", "dlm", "dse"),
+  KF.version = c("KFKSDS", "StructTS", "KFAS", "FKF", "dlm", "dse"),
   KF.args = list(), check.args = TRUE, debug = FALSE)
 {
   KF.version <- match.arg(KF.version)[1]
@@ -25,10 +25,11 @@ KalmanFilter <- function(y, ss,
       mod <- list(Z = ss$Z, a = ss$a0, P = ss$P0, T = ss$T, 
         V = ss$Q, h = ss$H, Pn = ss$P0)
       res <- stats::KalmanRun(y, mod, -1, TRUE)
+      res[[1]][1] <- 2 * res[[1]][1] - log(res[[1]][2])
+
       names(res) <- c("values", "residuals", "states")
-
-      res$mloglik <- 0.5 * sum(res[[1]]) / length(y)
-
+      res$mloglik <- 0.5 * sum(res[[1]])  #0.5 * sum(res[[1]]) / length(y)
+	
       res[[1]] <- NULL
       id <- match(diag(ss$V), diag(ss$Q))
       res[[2]] <- res[[2]][,id]
@@ -37,21 +38,27 @@ KalmanFilter <- function(y, ss,
       tsp(res[[2]]) <- tsp(y)
     },
 
-    #"KFAS" = 
-    #{
-    #  require("KFAS")
-    #
-    #  mkfas <- KFAS::SSModel(y = y, Z = ss$Z, H = ss$H, T = ss$T, 
-    #    R = ss$R, Q = ss$V, a1 = a$a0, P1 = ss$P0, P1inf = a$P1inf,
-    #    distribution = "Gaussian", transform = "none", tolF = a$tolF)
-    #
-    #  res <- KFAS::KFS(mkfas, smoothing = "none", simplify = TRUE)
-    #  res$mloglik <- -res$logLik
-    #},
+    "KFAS" = 
+    {
+      #require("KFAS")
+    
+      #mkfas <- KFAS::SSModel(y = y, Z = ss$Z, H = ss$H, T = ss$T, 
+      #  R = ss$R, Q = ss$V, a1 = a$a0, P1 = ss$P0, P1inf = a$P1inf,
+      #  distribution = "Gaussian", transform = "none", tolF = a$tolF)
+
+      #ss <- char2numeric(m0, FALSE)
+      #do not use "KFAS::" inside KFASS::SSmodel
+      tmp <- KFAS::SSMcustom(ss$Z, ss$T, ss$R, ss$V, a$a0, ss$P0, a$P1inf, 1, length(y))
+      mkfas <- KFAS::SSModel(y ~ -1 + tmp, H = ss$H, 
+        data = data.frame(y = y), distribution = "gaussian", tol = a$tolF)
+
+      res <- KFAS::KFS(mkfas, smoothing = "none", simplify = TRUE)
+      res$mloglik <- -res$logLik
+    },
 
     "FKF" = 
     {
-      require("FKF")
+      #require("FKF")
 
       res <- FKF::fkf(a0 = ss$a0, P0 = ss$P0, 
         dt = matrix(0, nrow = ncol(ss$T)), ct = a$ct, 
@@ -64,9 +71,9 @@ KalmanFilter <- function(y, ss,
     #{
     #  require("sspir")
     #
-    #  y <- ts(matrix(y))
-    #  tsp(y) <- tsp(y)
-    #  msspir <- sspir::SS(y = y,
+    #  yaux <- ts(matrix(y))
+    #  tsp(yaux) <- tsp(y)
+    #  msspir <- sspir::SS(y = yaux,
     #    Fmat = function(tt,x,phi) { return(matrix(phi$Z)) },
     #    Gmat = function(tt,x,phi) { return(phi$T) },
     #    Vmat = function(tt,x,phi) { return(matrix(phi$H)) },
@@ -79,7 +86,7 @@ KalmanFilter <- function(y, ss,
 
     "dlm" = 
     {
-      require("dlm")
+      #require("dlm")
 
       mdlm <- list(m0 = ss$a0, C0 = ss$P0,
         FF = rbind(ss$Z), V = matrix(ss$H), GG = ss$T, W = ss$Q)
@@ -92,12 +99,14 @@ KalmanFilter <- function(y, ss,
 
     "dse" = 
     {
-      require("dse")
+      #require("dse")
 
       mdse <- dse::SS(F. = ss$T, G = NULL, H = ss$Z, K = NULL, Q = ss$Q, 
         R = matrix(ss$H), z0 = rbind(ss$a0), P0 = ss$P0, rootP0 = NULL,
         constants = NULL, description = NULL, names = NULL, 
         input.names = NULL, output.names = NULL)
+      ##NOTE requires loading "dse"
+      TSdata <- dse::TSdata
       res <- dse::l(mdse, TSdata(output = y), result = "like")
       res <- list(mloglik = -res)
     }
@@ -133,8 +142,8 @@ make.KF.args <- function(ss, KF.version, KF.args = list())
     list2
   }
 
-  KF.version <- match.arg(KF.version, 
-    eval(formals(KFKSDS::KalmanFilter)$KF.version))
+#  KF.version <- match.arg(KF.version, 
+#    eval(formals(KFKSDS::KalmanFilter)$KF.version))
 
   P0cov <- if (is.null(KF.args$P0cov)) FALSE else KF.args$P0cov
   if (P0cov && !is.null(ss))
@@ -155,20 +164,20 @@ make.KF.args <- function(ss, KF.version, KF.args = list())
 
     "StructTS" = { ldef },
 
-    #"KFAS" = 
-    #{
-    #  a0 <- ss$a0
-    #  P1inf <- matrix(0, nrow(ss$P0), ncol(ss$P0))
-    #  if (all(ss$P0 == 0))
-    #  {
-    #    a0[] <- 0
-    #          diag(P1inf) <- 1  
-    #  }
-    #
-    #  c(ldef, list(#yt = y, Zt = ss$Z, Tt = ss$T, Rt = ss$R, 
-    #    #Ht = ss$H, Qt = ss$V, a1 = ss$a0, P1 = ss$P0, 
-    #    a0 = a0, P1inf = P1inf, tolF = 1e-08))
-    #},
+    "KFAS" = 
+    {
+      a0 <- ss$a0
+      P1inf <- matrix(0, nrow(ss$P0), ncol(ss$P0))
+      if (all(ss$P0 == 0))
+      {
+        a0[] <- 0
+              diag(P1inf) <- 1  
+      }
+    
+      c(ldef, list(#yt = y, Zt = ss$Z, Tt = ss$T, Rt = ss$R, 
+        #Ht = ss$H, Qt = ss$V, a1 = ss$a0, P1 = ss$P0, 
+        a0 = a0, P1inf = P1inf, tolF = 1e-08))
+    },
 
     "FKF" = 
     {
@@ -177,7 +186,7 @@ make.KF.args <- function(ss, KF.version, KF.args = list())
         check.input = TRUE))
     },
 
-    #"sspir" = { ldef },
+    "sspir" = { ldef },
 
     "dlm" = { ldef },
 

@@ -1,17 +1,17 @@
 Package: KFKSDS
-Version: 1.5
-Date: 2014-07-09
+Version: 1.6
+Date: 2015-01-28
 Title: Kalman Filter, Smoother and Disturbance Smoother
 Description: Naive implementation of the Kalman filter, smoother and disturbance 
-  smoother for state space models. An interface to other implementations of the 
-  filter that are available in other packages is also provided.
+  smoother for state space models.
 Author: Javier López-de-Lacalle
 Maintainer: Javier López-de-Lacalle <javlacalle@yahoo.es>
 Depends: R (>= 3.0.0), stats
-Suggests: dlm, dse, FKF, numDeriv, stsm.class
+Suggests: dlm, dse, FKF, KFAS, numDeriv, stsm
 NeedsCompilation: yes
 Encoding: UTF-8
 License: GPL-2
+URL: http://jalobe.com
+Packaged: 2015-01-28 19:23:02 UTC; javlacalle
 Repository: CRAN
-Packaged: 2014-07-26 13:08:33 UTC; javlacalle
-Date/Publication: 2014-07-27 08:10:07
+Date/Publication: 2015-01-28 20:51:01

@@ -104,6 +104,7 @@ KF <- function(y, ss, convergence = c(0.001, length(y)), t0 = 1)
 
         fprev <- f[i]
 
+##FIXME this should be insice the if statement where counter is incremented
         if (counter == maxiter) {
           notconv <- FALSE # the filter has converged to a steady state
           convit <- i

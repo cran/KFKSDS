@@ -27,7 +27,9 @@ numerical problems that may arise in the original equations.
 
 The package includes a wrapper function that links to functions 
 from the following packages:
-\pkg{dlm}, \pkg{dse}, \pkg{FKF}, \pkg{KFAS}, \pkg{sspir} and \pkg{stats}.
+\pkg{dlm}, \pkg{dse}, \pkg{FKF}, \pkg{KFAS} 
+%\pkg{sspir}
+and \pkg{stats}.
 The original interface provided by each package is recommended as they 
 sometimes provide further capabilities or options.
 Nevertheless, the wrapper function provided in this package is useful 
@@ -53,7 +55,7 @@ matrix operations can be reduced substantially.
 Some parts of the code are implemented in the C language where the matrix operations
 are handled through the GNU Scientific Library.
 
-The package \pkg{stsm.class} is a useful complement to easily create an object 
+The package \pkg{stsm} is a useful complement to easily create an object 
 containing the matrices of the state space representation for the structural 
 models defined in that package.
 }

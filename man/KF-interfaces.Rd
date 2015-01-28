@@ -12,7 +12,7 @@ of the Kalman filter available in different packages.
 
 \usage{
 KalmanFilter(y, ss, 
-  KF.version = c("KFKSDS", "StructTS", "FKF", "dlm", "dse"),
+  KF.version = c("KFKSDS", "StructTS", "KFAS", "FKF", "dlm", "dse"),
   KF.args = list(), check.args = TRUE, debug = FALSE)
 make.KF.args(ss, KF.version, KF.args = list())
 }
@@ -41,7 +41,7 @@ further capabilities in the latest updates.
 
 The elements in the argument \code{ss} must be named in accordance with 
 the notation given in \code{\link[KFKSDS]{KF}}.
-The function \code{\link[stsm.class]{char2numeric}} in package \pkg{stsm.class}
+The function \code{\link[stsm]{char2numeric}} in package \pkg{stsm}
 is a convenient way to create the argument \code{ss} for those models already 
 defined in that package.
 
@@ -57,15 +57,11 @@ values for this argument are the names of the package that contains
 the Kalman filter interface.
 
 Notes: 
-(1) The package 
-\href{http://cran.r-project.org/web/packages/KFAS/index.html}{KFAS}
-has recently modified the interface and a previous version of the function 
-\code{KalmanFilter} is no longer valid. This function will probably be updated
-in future versions to reincorporate \code{KFAS} as an option.
-
-(2) The package \pkg{sppir} is no longer maintained on CRAN and is not currently
+(1) The package \pkg{sppir} is no longer maintained on CRAN and is not currently
 available here as an option. For old versions see 
 \href{http://cran.r-project.org/src/contrib/Archive/sspir/}{sspir}.
+
+(2) \code{KF.version="dse"} requires manually loading the package \pkg{dse}.
 }
 
 \value{
@@ -106,15 +102,16 @@ Petris, G. (2013) \R package version 1.1-3.
 
 \seealso{
 \code{\link[KFKSDS]{KF}};
-\code{\link[stsm.class]{char2numeric}} in package \pkg{stsm.class}.
+\code{\link[stsm]{char2numeric}} in package \pkg{stsm}.
 }
 
 \examples{
 # state space representation of a structural time series model 
 # with arbitrary parameter values
-m <- stsm.class::stsm.model(model = "BSM", y = AirPassengers, transP="StructTS",
+require("stsm")
+m <- stsm::stsm.model(model = "BSM", y = AirPassengers, transP = "StructTS",
   pars = c("var1" = 30, "var2" = 15, "var3" = 1, "var4" = 12))
-ss <- stsm.class::char2numeric(m)
+ss <- stsm::char2numeric(m)
 # value of the likelihood using different interfaces and options
 KalmanFilter(y = m@y, ss = ss, KF.version = "KFKSDS", KF.args = list(P0cov = FALSE))$mloglik
 KalmanFilter(y = m@y, ss = ss, KF.version = "KFKSDS", KF.args = list(P0cov = TRUE))$mloglik

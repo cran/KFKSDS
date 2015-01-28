@@ -68,15 +68,15 @@ Cambridge University Press.
 
 \seealso{
 \code{\link[KFKSDS]{KF}}, \code{\link[KFKSDS]{KSDS}};
-\code{\link[stsm.class]{char2numeric}} in package \pkg{stsm.class}.
+\code{\link[stsm]{char2numeric}} in package \pkg{stsm}.
 }
 
 \examples{
 # local level plus seasonal model with arbitrary parameter values
 # for the 'JohnsonJohnson' time series
-m <- stsm.class::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
+m <- stsm::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
   pars = c("var1" = 2, "var2" = 15, "var3" = 30))
-ss <- stsm.class::char2numeric(m)
+ss <- stsm::char2numeric(m)
 
 kf <- KF(m@y, ss)
 ks <- KS(m@y, ss, kf)
@@ -97,8 +97,8 @@ all.equal(ks$ahat, ksd$ahat)
 # yield same results up to a tolerance error
 fcn <- function(x, model, type, i)
 {
-  m <- stsm.class::set.pars(model, x)
-  ss <- stsm.class::char2numeric(m)
+  m <- stsm::set.pars(model, x)
+  ss <- stsm::char2numeric(m)
   kf <- KF(m@y, ss)
   ks <- KS(m@y, ss, kf)
   switch(type, "ahat" = sum(ks$ahat[,i]), "r" = sum(ks$r[,i]))

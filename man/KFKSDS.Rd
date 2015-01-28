@@ -75,7 +75,7 @@ Cambridge University Press.
 
 \seealso{
 \code{\link[KFKSDS]{KF}}, \code{\link[KFKSDS]{KS}};
-\code{\link[stsm.class]{char2numeric}} in package \pkg{stsm.class}.
+\code{\link[stsm]{char2numeric}} in package \pkg{stsm}.
 }
 
 \examples{
@@ -86,9 +86,9 @@ Cambridge University Press.
 
 # local level plus seasonal model with arbitrary parameter values
 # for the 'JohnsonJohnson' time series
-m <- stsm.class::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
+m <- stsm::stsm.model(model = "llm+seas", y = JohnsonJohnson, 
   pars = c("var1" = 2, "var2" = 15, "var3" = 30))
-ss <- stsm.class::char2numeric(m)
+ss <- stsm::char2numeric(m)
 kfd <- KF.deriv(m@y, ss)
 ksds <- KSDS(m@y, ss, kfd)
 da <- KSDS.deriv(m@y, ss, kfd)
